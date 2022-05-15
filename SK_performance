@@ -1,5 +1,9 @@
+from cProfile import label
+from numpy import sort
 import pymssql
-  
+import datetime
+import pandas as pd
+
 # MSSQL 접속
 conn = pymssql.connect(host=r"61.97.14.141", database='TEST-SAPIF', user='wmsa',password='skbt#$erver1')
 
@@ -7,24 +11,54 @@ conn = pymssql.connect(host=r"61.97.14.141", database='TEST-SAPIF', user='wmsa',
 # Connection 으로부터 Cursor 생성
 cursor = conn.cursor()
 
+
+# # 검색 항목 선택
+# contentNo = input('1. Campaign No. , 2. Order No., 3. Batch No., 4. Item ID : ')
+# content = 
+
+# # 선택한 항목에 대한 값 입력
+# campno = int(input('campaign No:'))
 orderno = int(input('order No:'))
 lotno = input('batch No:')
-itemcode = input('Item code:')
+itemcode = input('Item ID:')
 
-# SQL문 실행
+# def search (orderno, lotno, itemcode):
+    # SQL문 실행
 cursor.execute('''
-SELECT  itemcode,orderno,lotno, strdate, strtime, enddate, endtime, Cast(CONVERT(DECIMAL(10,2),manhr) as nvarchar) AS manhr, Cast(CONVERT(DECIMAL(10,2),machinehr) as nvarchar) AS machinehr
+SELECT  itemcode,orderno,lotno, convert(datetime,concat(substring(strdate,1,4),'-',substring(strdate,5,2),'-',substring(strdate,7,2),' ',substring(strtime,1,2),':',substring(strtime,3,2),':',substring(strtime,5,2))) , 
+convert(datetime,concat(substring(enddate,1,4),'-',substring(enddate,5,2),'-',substring(enddate,7,2),' ',substring(endtime,1,2),':',substring(endtime,3,2),':',substring(endtime,5,2))), 
+Cast(CONVERT(DECIMAL(10,2),manhr) as nvarchar) AS manhr, Cast(CONVERT(DECIMAL(10,2),machinehr) as nvarchar) AS machinehr
 FROM atE_MakingWorktime
 WHERE orderno = %d
 OR lotno = '%s' 
-OR itemcode = %s;
+OR itemcode = '%s'
+AND status='S';
 '''%(orderno, lotno, itemcode))
 
 # 데이타 하나씩 Fetch하여 출력
 row = cursor.fetchone()
+wokingtime_list=[]
+
 while row:
-    print(row)        
-    row = cursor.fetchone()
+    wokingtime_list.append(list(row))
+    duration=(row[4]-row[3]).seconds/3600
     
+    row = cursor.fetchone()
+
 # 연결 끊기
-conn.close()		      
+conn.close()		  
+
+dataframe = pd.DataFrame(wokingtime_list, columns=['id','orderno','batchno','star','end','manhr','machinehr'])
+df=dataframe
+df=df.drop_duplicates(['batchno'], keep = 'first')
+
+batchno_list=sort(df['batchno'].values.tolist())
+
+for i in batchno_list:
+    result_df=dataframe[dataframe['batchno']=='%s'%i]
+    print(result_df)
+
+#print(dataframe)
+
+
+    
