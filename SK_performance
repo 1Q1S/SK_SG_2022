@@ -45,7 +45,7 @@ while row:
     
     row = cursor.fetchone()
 
-# 연결 끊기
+# SQL 서버 연결 끊기
 conn.close()		  
 
 dataframe = pd.DataFrame(wokingtime_list, columns=['id','orderno','batchno','star','end','manhr','machinehr'])
@@ -56,6 +56,10 @@ batchno_list=sort(df['batchno'].values.tolist())
 
 for i in batchno_list:
     result_df=dataframe[dataframe['batchno']=='%s'%i]
+    result_df=result_df[result_df['manhr']!='0.00']
+    print(result_df.info())
+    result_df['diff_time_std_init']=result_df['end']-result_df['star']
+
     print(result_df)
 
 #print(dataframe)
