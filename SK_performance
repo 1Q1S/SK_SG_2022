@@ -1,4 +1,5 @@
 from cProfile import label
+from winreg import QueryReflectionKey
 from numpy import sort
 import pymssql
 import datetime
@@ -53,16 +54,25 @@ df=dataframe
 df=df.drop_duplicates(['batchno'], keep = 'first')
 
 batchno_list=sort(df['batchno'].values.tolist())
+print(dataframe.info())
 
 for i in batchno_list:
     result_df=dataframe[dataframe['batchno']=='%s'%i]
-    result_df=result_df[result_df['manhr']!='0.00']
-    print(result_df.info())
-    result_df['diff_time_std_init']=result_df['end']-result_df['star']
-
+    result_df=result_df[result_df['manhr']!='0.00']    
+    result_df['diff_time_std_init']=result_df['end']-result_df['star'].min()
     print(result_df)
 
-#print(dataframe)
 
+# Query
 
-    
+'''
+select DISTINCT A.itemcode,A.orderno,A.lotno, B.operationcode ,operationname ,A.strdate,A.strtime,A.enddate, A.endtime ,A.manhr ,A.machinehr ,convert(datetime,concat(substring(A.strdate,1,4),'-',substring(A.strdate,5,2),'-',substring(A.strdate,7,2),' ',substring(A.strtime,1,2),':',substring(A.strtime,3,2),':',substring(A.strtime,5,2))) , 
+convert(datetime,concat(substring(A.enddate,1,4),'-',substring(A.enddate,5,2),'-',substring(A.enddate,7,2),' ',substring(A.endtime,1,2),':',substring(A.endtime,3,2),':',substring(A.endtime,5,2)))
+FROM (SELECT  *, ROW_NUMBER() OVER(PARTITION BY confirmno ORDER BY convert(datetime,concat(substring(insertdate,1,4),'-',substring(insertdate,5,2),'-',substring(insertdate,7,2),' ',substring(inserttime ,1,2),':',substring(inserttime,3,2),':',substring(inserttime,5,2))) DESC) as rn FROM E_MakingWorktime) A
+join E_MakingOperation B
+on A.confirmno = B.confirmno
+where A.itemcode='100271'
+and A.lotno='211009028N'
+order by operationcode;
+
+'''
