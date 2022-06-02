@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Hello SK biotek</title>
+
+    <link rel="icon" type="image/png" href="skbt.png" />
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  </head>
+
+  <body>
+    Hello SK biotek! <br>
+    This is the current date and time, as computed by Python:
+    <py-script>
+
+from datetime import datetime
+now = datetime.now()
+now.strftime("%m/%d/%Y, %H:%M:%S")
+
+    </py-script>
+
+    <h2 class="text-2xl font-mono text-black-600"> <a> 반응기 정보 </a></h2>
+    <p>A static demo of the <code>&lt;py-script&gt;</code> tag</p>
+    
+  </body>
+</html>
