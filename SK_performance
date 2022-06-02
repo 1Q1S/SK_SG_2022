@@ -19,48 +19,73 @@ cursor = conn.cursor()
 
 # # 선택한 항목에 대한 값 입력
 # campno = int(input('campaign No:'))
-orderno = int(input('order No:'))
 lotno = input('batch No:')
 itemcode = input('Item ID:')
 
 # def search (orderno, lotno, itemcode):
     # SQL문 실행
 cursor.execute('''
-SELECT  itemcode,orderno,lotno, convert(datetime,concat(substring(strdate,1,4),'-',substring(strdate,5,2),'-',substring(strdate,7,2),' ',substring(strtime,1,2),':',substring(strtime,3,2),':',substring(strtime,5,2))) , 
-convert(datetime,concat(substring(enddate,1,4),'-',substring(enddate,5,2),'-',substring(enddate,7,2),' ',substring(endtime,1,2),':',substring(endtime,3,2),':',substring(endtime,5,2))), 
-Cast(CONVERT(DECIMAL(10,2),manhr) as nvarchar) AS manhr, Cast(CONVERT(DECIMAL(10,2),machinehr) as nvarchar) AS machinehr
-FROM atE_MakingWorktime
-WHERE orderno = %d
-OR lotno = '%s' 
-OR itemcode = '%s'
-AND status='S';
-'''%(orderno, lotno, itemcode))
+select DISTINCT A.itemcode,A.orderno,A.lotno, B.operationcode ,operationname ,convert(datetime,concat(substring(A.strdate,1,4),'-',substring(A.strdate,5,2),'-',substring(A.strdate,7,2),' ',substring(A.strtime,1,2),':',substring(A.strtime,3,2),':',substring(A.strtime,5,2))) as str , 
+convert(datetime,concat(substring(A.enddate,1,4),'-',substring(A.enddate,5,2),'-',substring(A.enddate,7,2),' ',substring(A.endtime,1,2),':',substring(A.endtime,3,2),':',substring(A.endtime,5,2))) as ed,A.manhr ,A.machinehr
+FROM (SELECT  *, ROW_NUMBER() OVER(PARTITION BY confirmno ORDER BY convert(datetime,concat(substring(insertdate,1,4),'-',substring(insertdate,5,2),'-',substring(insertdate,7,2),' ',substring(inserttime ,1,2),':',substring(inserttime,3,2),':',substring(inserttime,5,2))) DESC) as rn FROM E_MakingWorktime) A
+join E_MakingOperation B
+on A.confirmno = B.confirmno
+where A.itemcode= '%s'
+OR A.lotno = '%s' 
+ORDER BY B.operationcode;
+'''%(itemcode, lotno ))
+
+# cursor.execute('''
+# SELECT  itemcode,orderno,lotno, convert(datetime,concat(substring(strdate,1,4),'-',substring(strdate,5,2),'-',substring(strdate,7,2),' ',substring(strtime,1,2),':',substring(strtime,3,2),':',substring(strtime,5,2))) , 
+# convert(datetime,concat(substring(enddate,1,4),'-',substring(enddate,5,2),'-',substring(enddate,7,2),' ',substring(endtime,1,2),':',substring(endtime,3,2),':',substring(endtime,5,2))), 
+# Cast(CONVERT(DECIMAL(10,2),manhr) as nvarchar) AS manhr, Cast(CONVERT(DECIMAL(10,2),machinehr) as nvarchar) AS machinehr
+# FROM atE_MakingWorktime
+# WHERE orderno = %d
+# OR lotno = '%s' 
+# OR itemcode = '%s';
+# '''%(orderno, lotno, itemcode))
 
 # 데이타 하나씩 Fetch하여 출력
-row = cursor.fetchone()
-wokingtime_list=[]
+# row = cursor.fetchone()
+# wokingtime_list=[]
 
-while row:
-    wokingtime_list.append(list(row))
-    duration=(row[4]-row[3]).seconds/3600
+# while row:
+#     wokingtime_list.append(list(row))
     
-    row = cursor.fetchone()
+#     if row[6]>row[5]:
+#         duration=(row[6]-row[5]).seconds/3600
+    
+#     else:
+#         duration=0
+
+    
+#     row = cursor.fetchone()
+
+# 데이타 전부 출력
+al_row = cursor.fetchall()
 
 # SQL 서버 연결 끊기
 conn.close()		  
 
-dataframe = pd.DataFrame(wokingtime_list, columns=['id','orderno','batchno','star','end','manhr','machinehr'])
-df=dataframe
-df=df.drop_duplicates(['batchno'], keep = 'first')
+al_list= [list(i) for i in al_row]
 
-batchno_list=sort(df['batchno'].values.tolist())
-print(dataframe.info())
 
-for i in batchno_list:
-    result_df=dataframe[dataframe['batchno']=='%s'%i]
-    result_df=result_df[result_df['manhr']!='0.00']    
-    result_df['diff_time_std_init']=result_df['end']-result_df['star'].min()
-    print(result_df)
+dataframe = pd.DataFrame(al_list, columns=['id','orderno','batchno','operationcode','operationname','start','end','manhr','machinehr'])
+
+print(dataframe)
+
+# dataframe = pd.DataFrame(wokingtime_list, columns=['id','orderno','batchno','operationcode','operationname','start','end','manhr','machinehr'])
+# df=dataframe
+# df=df.drop_duplicates(['batchno'], keep = 'first')
+
+# batchno_list=sort(df['batchno'].values.tolist())
+# print(dataframe.info())
+
+# for i in batchno_list:
+#     result_df=dataframe[dataframe['batchno']=='%s'%i]
+#     result_df=result_df[result_df['manhr']!=0.0000]    
+#     result_df['diff_time_std_init']=result_df['end']-result_df['start'].min()
+#     print(result_df)
 
 
 # Query
