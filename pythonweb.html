@@ -4,33 +4,63 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-    <title>이선규_Pyscript</title>
+    <title>SKBT_Pyscript</title>
 
-    <link rel="icon" type="image/png" href="sk.png" />
+    <link rel="icon" type="image/png" href="skbt.png" />
     <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+
+    <style>
+      .jb-xx-small { font-size: xx-small; }
+      .jb-x-small { font-size: x-small; }
+      .jb-small { font-size: small; }
+      .jb-medium { font-size: medium; }
+      .jb-large { font-size: large; }
+      .jb-x-large { font-size: x-large; }
+      .jb-xx-large { font-size: xx-large; }
+    </style>
+
   </head>
 
   <body class="container font-mono">
 
-    <h1 class="text-4xl font-bold">Note</h1>
+    <h1 class="text-4xl font-bold text-red-700">SK Biotek</h1>
 
     <br>
-    <h2 class="text-3xl font-bold">Basic examples</h2>
+    <h2 class="text-3xl font-bold text-red-500">Basic examples</h2>
     <hr/>
     
     <h2 class="text-2xl font-bold text-blue-600">
-        <a href="./hello_skbt.html" target=”_blank”>
+        <a href="http://massmail.sk.com/menu/print.aspx?rcode=no11" target=”_blank”>
             <div>
                 <div style="float: left">
-                    <img src="skbt.png" alt="My Image" width="50" height="50" /> 
+                    <img src="restaurant.png" alt="My Image" width="50" height="50" /> 
                 </div>
-                <div> &nbsp; Hello SK biotek
-                </div>
+                <div>  This week's menu </div>
+                <div>
+                <table >       
+                  <tr>
+                      <td class="jb-small">Today's menu: &nbsp; </td>
+                      <td class="jb-small"> <py-script> 
+                                              #from selenium import webdriver
+                                              #from selenium.webdriver.common.keys import Keys                        
+                                              #import time
+                                              from datetime import datetime
+
+                                              url = 'http://massmail.sk.com/menu/print.aspx?rcode=no11'
+                                              driver = webdriver.Chrome('/Users/sangwoo/Desktop/chromedriver')
+
+                                              now = datetime.now()
+                                              now.strftime("%Y년 %m월 %d일")                    
+                          </py-script>
+                        </td>                      
+                  </tr>                                 
+              </table>
             </div>
         </a>
       </h2>
 
-    <p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Welcome to the <code>&lt;SK biotek&gt;</code></p>
+    <p> &nbsp;Welcome to the <code>&lt;SK biotek&gt;</code></p>
 
     <h2 class="text-2xl font-bold text-blue-600"><a href="./simple_clock.html" target=”_blank”>Simple clock</a></h2>
     <p>A dynamic demo of the <code>&lt;py-script&gt;</code> tag</p>
