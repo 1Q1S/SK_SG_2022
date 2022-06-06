@@ -42,24 +42,11 @@
                   <tr>
                       <td class="jb-small">Today's menu: &nbsp; </td>
                       <td class="jb-small"> <py-script> 
-                                              import numpy
-                                              import requests
-                                              from bs4 import 
-                                              from datetime import datetime
+                        import sys
+                        sys.path.append("./todaymenu")
+                        import todaymenu as i
+                        print(i.a, i.b)              
 
-                                              url = 'http://massmail.sk.com/menu/print.aspx?rcode=no11'
-                                              response = requests.get(url)
-                                              if response.status_code == 200:
-                                                html = response.text
-                                                soup = BeautifulSoup(html, 'html.parser')
-                                                print(soup)
-                                              else :
-                                                print(response.status_code)
-<!-- 
-                                              driver = webdriver.Chrome('/Users/sangwoo/Desktop/chromedriver') -->
-<!-- 
-                                              now = datetime.now()
-                                              now.strftime("%Y년 %m월 %d일")                     -->
                           </py-script>
                         </td>                      
                   </tr>                                 
