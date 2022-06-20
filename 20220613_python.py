@@ -10,20 +10,20 @@ import pymssql
 import datetime
 import pandas as pd
 
-material_type=input('1.제품, 2.원료 : ')
-material_ID=input('물질 ID : ') 
+# material_type=input('1.제품, 2.원료 : ')
+# material_ID=input('물질 ID : ') 
 
-Process_type=input('1.공정, 2.세척 : ')
+# Process_type=input('1.공정, 2.세척 : ')
 
-period=input('기간을 입력해주세요. Ex) 20220614 20220616 _ 전체 기간 - 0 ').split(' ')
+# period=input('기간을 입력해주세요. Ex) 20220614 20220616 _ 전체 기간 - 0 ').split(' ')
 
-search_type=input('1.Campaign No., 2.Batch No.: ')  
+# search_type=input('1.Campaign No., 2.Batch No.: ')  
 
-Campaign_No=input('Campaign No.를 입력하세요. (Campaign No. List 보기 - 0) : ')
+# Campaign_No=input('Campaign No.를 입력하세요. (Campaign No. List 보기 - 0) : ')
 
-Batch_No=input('Batch No.를 입력하세요. (Batch No. List 보기 - 0) : ')
+# Batch_No=input('Batch No.를 입력하세요. (Batch No. List 보기 - 0) : ')
 
-search_value_type=input('1. 작업실적, 2. 원료 사용량, 3. Tag 값 :')
+# search_value_type=input('1. 작업실적, 2. 원료 사용량, 3. Tag 값 :')
 
 def database_dataload(database_name,userID, userPW, sql):
     conn = pymssql.connect(host=r"61.97.14.141", database=database_name, user=userID,password=userPW)
@@ -47,11 +47,29 @@ def BatchNo_list(CampaignNO='', stardate='',enddate='', rawmaterial_ID=''):
     #WMS에서 불러올 수 있는지 사전 확인 필요
     return
 
-def operation_list(BatchNO, stardate='',enddate=''):
+def operation_list(ProductID, BatchNO, stardate='',enddate=''):
     #공정 별 공정 내역 list로 반환 필요
     #WMS database에 record 있는 것 확인함.
     #공정 변화가 있을 경우 seq.로 일단 순서로 합친 후, process name이 같은 곳에 시간 뿌려질 수 있도록 진행
-    return
+    database_name= 'TEST-SAPIF'
+    userID='wmsa'
+    userPW='skbt#$erver1'
+    sql=('''
+        select DISTINCT A.itemcode,A.orderno,A.lotno, B.operationcode ,operationname ,convert(datetime,concat(substring(A.strdate,1,4),'-',substring(A.strdate,5,2),'-',substring(A.strdate,7,2),' ',substring(A.strtime,1,2),':',substring(A.strtime,3,2),':',substring(A.strtime,5,2))) as str , 
+        convert(datetime,concat(substring(A.enddate,1,4),'-',substring(A.enddate,5,2),'-',substring(A.enddate,7,2),' ',substring(A.endtime,1,2),':',substring(A.endtime,3,2),':',substring(A.endtime,5,2))) as ed,A.manhr ,A.machinehr
+        FROM (SELECT  *, ROW_NUMBER() OVER(PARTITION BY confirmno ORDER BY convert(datetime,concat(substring(insertdate,1,4),'-',substring(insertdate,5,2),'-',substring(insertdate,7,2),' ',substring(inserttime ,1,2),':',substring(inserttime,3,2),':',substring(inserttime,5,2))) DESC) as rn FROM E_MakingWorktime) A
+        join E_MakingOperation B
+        on A.confirmno = B.confirmno
+        where A.itemcode= '%s'
+        OR A.lotno = '%s' 
+        ORDER BY B.operationcode;
+        '''%(ProductID, BatchNO))
+    operation_list_df=database_dataload(database_name,userID, userPW, sql)
+    operation_list_df=operation_list_df.drop_duplicates([3,4])
+    operation_list_df.reset_index(drop=False,inplace=True)
+    return operation_list_df[[3,4]]
+
+print(operation_list('100271','211009028N'))
 
 def Time_result(BatchNO, stardate='',enddate=''):
     #공정 별 작업 시간 list로 반환 필요
