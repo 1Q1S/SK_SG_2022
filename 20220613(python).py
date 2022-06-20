@@ -2,6 +2,79 @@
 자동 분석 공정 실적 분석
 '''
 # 실적 가져올 정보 입력하기
+# 제품/원료 > 공정/세척 > 기간/CampaignNO/BatchNo > 시간/사용량/Tag Value
+from cProfile import label
+from winreg import QueryReflectionKey
+from numpy import sort
+import pymssql
+import datetime
+import pandas as pd
+
+material_type=input('1.제품, 2.원료 : ')
+material_ID=input('물질 ID : ') 
+
+Process_type=input('1.공정, 2.세척 : ')
+
+period=input('기간을 입력해주세요. Ex) 20220614 20220616 _ 전체 기간 - 0 ').split(' ')
+
+search_type=input('1.Campaign No., 2.Batch No.: ')  
+
+Campaign_No=input('Campaign No.를 입력하세요. (Campaign No. List 보기 - 0) : ')
+
+Batch_No=input('Batch No.를 입력하세요. (Batch No. List 보기 - 0) : ')
+
+search_value_type=input('1. 작업실적, 2. 원료 사용량, 3. Tag 값 :')
+
+def database_dataload(database_name,userID, userPW, sql):
+    conn = pymssql.connect(host=r"61.97.14.141", database=database_name, user=userID,password=userPW)
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    al_row = cursor.fetchall()
+    al_list= [list(i) for i in al_row]
+    dataframe = pd.DataFrame(al_list)
+    conn.close()
+    return dataframe
+
+    
+
+def CampaignNo_list(Product_ID, stardate='',enddate=''):
+    #Campaign No.를 불러오려면 SAP I/F필요할 것 같음 사전 확인 필요
+    
+    return
+
+def BatchNo_list(CampaignNO='', stardate='',enddate='', rawmaterial_ID=''):
+    #Campaign No. > BR list 불러오기 Campaign No.와 마찬가지로 SAP I/F 필요할 것으로 보임
+    #WMS에서 불러올 수 있는지 사전 확인 필요
+    return
+
+def operation_list(BatchNO, stardate='',enddate=''):
+    #공정 별 공정 내역 list로 반환 필요
+    #WMS database에 record 있는 것 확인함.
+    #공정 변화가 있을 경우 seq.로 일단 순서로 합친 후, process name이 같은 곳에 시간 뿌려질 수 있도록 진행
+    return
+
+def Time_result(BatchNO, stardate='',enddate=''):
+    #공정 별 작업 시간 list로 반환 필요
+    #WMS database에 record 있는 것 확인함.
+    return
+
+def Tag_value(BatchNO, operation_seq , Tag_ID,stardate='',enddate=''):
+    #MES Database table에 존재함. 
+    #Batch No. 확인 > 시간 확인 join 시간 내의 Tag ID의 Value
+    #Batch No. vs Tag ID,  시간 vs Value 값으로 구현 가능하도록 List or dataframe로 반환
+    return
+
+
+def material_list(BatchNO, stardate='',enddate=''):
+    #MES Database table에 존재함. 
+    #Batch No. 확인 > BOM list 확인 
+    #BOM 변화가 있을 경우 seq.로 일단 순서로 합친 후, 사용량이 원료 순서&이름과 같은 곳에 뿌려질 수 있도록 진행
+    return
+
+def Wt_result(BatchNO, materialname, stardate='',enddate=''):
+   
+    return
+
 
 # Case1=제품별 (시간, 원료), (공정, 세척)
     # 공정/세척 타입 선택  > 시간, 원료 선택
